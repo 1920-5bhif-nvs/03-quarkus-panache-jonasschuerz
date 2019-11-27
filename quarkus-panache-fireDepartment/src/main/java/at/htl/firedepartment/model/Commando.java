@@ -1,17 +1,11 @@
-package at.htl.model;
+package at.htl.firedepartment.model;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.time.LocalDate;
 
-@XmlRootElement
 @Entity
-@Table(name = "Commando")
 public class Commando extends Member {
 
-    @Column
     private String functioning;
 
     public Commando(String name, String rank, String mail, LocalDate involvedSince, String function) {

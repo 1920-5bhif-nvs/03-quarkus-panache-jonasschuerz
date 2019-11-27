@@ -1,10 +1,10 @@
-package at.htl.rest;
+package at.htl.firedepartment.rest;
 
-import at.htl.model.Operation;
+import at.htl.firedepartment.model.Operation;
+import at.htl.firedepartment.repository.OperationRepository;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -13,14 +13,13 @@ import java.util.List;
 @Path("operation")
 public class OperationEndpoint {
     @Inject
-    EntityManager em;
+    OperationRepository operationRepository;
 
     @GET
     @Path("/findAll")
     @Produces(MediaType.APPLICATION_JSON)
     public Response findAll() {
-        TypedQuery<Operation> query = em.createNamedQuery("Operation.findAll", Operation.class);
-        List<Operation> operations = query.getResultList();
+        List<Operation> operations = operationRepository.listAll();
         return Response.ok().entity(operations).build();
     }
 
@@ -28,7 +27,7 @@ public class OperationEndpoint {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response findById(@PathParam("id") long id) {
-        Operation operation = em.find(Operation.class, id);
+        Operation operation = operationRepository.findById(id);
         if (operation == null) {
             return Response.status(404).build();
         }
@@ -38,11 +37,11 @@ public class OperationEndpoint {
     @DELETE
     @Path("/deleteOperation/{id}")
     public Response deleteById(@PathParam("id") long id) {
-        Operation operation = em.find(Operation.class, id);
+        Operation operation = operationRepository.findById(id);
         if (operation == null) {
             return Response.status(404).build();
         }
-        em.remove(operation);
+        operationRepository.delete(operation);
         return Response.noContent().build();
     }
 
@@ -50,7 +49,7 @@ public class OperationEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response save(Operation operation){
-        em.persist(operation);
+        operationRepository.persist(operation);
         return Response.ok().entity(operation).build();
     }
 

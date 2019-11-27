@@ -1,10 +1,9 @@
-package at.htl.rest;
+package at.htl.firedepartment.rest;
 
-import at.htl.model.Member;
+import at.htl.firedepartment.model.Member;
+import at.htl.firedepartment.repository.MemberRepository;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -14,16 +13,17 @@ import java.util.List;
 @Path("member")
 public class MemberEndpoint {
     @Inject
-    EntityManager em;
+    MemberRepository memberRepository;
 
     @GET
     @Path("/findAll")
     @Produces(MediaType.APPLICATION_JSON)
-    @Transactional
     public Response findAll() {
-        TypedQuery<Member> query = em.createNamedQuery("Member.findAll", Member.class);
-        List<Member> members = query.getResultList();
-        return Response.ok().entity(members).build();
+        List<Member> members = memberRepository.listAll();
+        if(members != null && !members.isEmpty())
+            return Response.ok(members).build();
+        else
+            return Response.noContent().build();
     }
 
     @GET
@@ -31,7 +31,7 @@ public class MemberEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
     public Response findById(@PathParam("id") long id) {
-        Member member = em.find(Member.class, id);
+        Member member = memberRepository.findById(id);
         if (member == null) {
             return Response.status(404).build();
         }
@@ -42,11 +42,11 @@ public class MemberEndpoint {
     @Path("/deleteMember/{id}")
     @Transactional
     public Response deleteById(@PathParam("id") long id) {
-        Member member = em.find(Member.class, id);
+        Member member = memberRepository.findById(id);
         if (member == null) {
             return Response.status(404).build();
         }
-        em.remove(member);
+        memberRepository.delete(member);
         return Response.noContent().build();
     }
 
@@ -54,7 +54,7 @@ public class MemberEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response save(Member member){
-        em.persist(member);
+        memberRepository.persist(member);
         return Response.ok().entity(member).build();
     }
 

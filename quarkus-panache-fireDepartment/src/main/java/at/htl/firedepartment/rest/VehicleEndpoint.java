@@ -1,10 +1,9 @@
-package at.htl.rest;
+package at.htl.firedepartment.rest;
 
-import at.htl.model.Vehicle;
+import at.htl.firedepartment.model.Vehicle;
+import at.htl.firedepartment.repository.VehicleRepository;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -14,15 +13,14 @@ import java.util.List;
 @Path("vehicle")
 public class VehicleEndpoint {
     @Inject
-    EntityManager em;
+    VehicleRepository vehicleRepository;
 
     @Path("/findAll")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
     public Response findAll() {
-        TypedQuery<Vehicle> query = em.createNamedQuery("Vehicle.findAll", Vehicle.class);
-        List<Vehicle> vehicles = query.getResultList();
+        List<Vehicle> vehicles =  vehicleRepository.listAll();
         return Response.ok().entity(vehicles).build();
     }
 
@@ -31,7 +29,7 @@ public class VehicleEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
     public Response findById(@PathParam("id") long id) {
-        Vehicle vehicle = em.find(Vehicle.class, id);
+        Vehicle vehicle = vehicleRepository.findById(id);
         if (vehicle == null) {
             return Response.status(404).build();
         }
@@ -42,11 +40,11 @@ public class VehicleEndpoint {
     @Path("/deleteVehicle/{id}")
     @Transactional
     public Response deleteById(@PathParam("id") long id) {
-        Vehicle vehicle = em.find(Vehicle.class, id);
+        Vehicle vehicle = vehicleRepository.findById(id);
         if (vehicle == null) {
             return Response.status(404).build();
         }
-        em.remove(vehicle);
+        vehicleRepository.delete(vehicle);
         return Response.noContent().build();
     }
 
@@ -54,7 +52,7 @@ public class VehicleEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response save(Vehicle vehicle){
-        em.persist(vehicle);
+        vehicleRepository.persist(vehicle);
         return Response.ok().entity(vehicle).build();
     }
 
